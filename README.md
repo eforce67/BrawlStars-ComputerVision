@@ -9,11 +9,13 @@ To run the project, ensure you have the following libraries installed:
 !pip install graphviz matplotlib neat-python numpy opencv-python pillow pywin32 pynput ultralytics
 ```
 
-
 ## Input & Output Nodes
 ### Input Nodes
 Neat input nodes act as sensors to detect game environment variables. They include:
 - Connecter_1-6: These sensors detect objects in the player's direction, divided into equal slices around the player's position.
+
+### Here is a demo of this idea!
+![Demo of Player range and enemy detection](https://github.com/eforce67/BrawlStars-ComputerVision/blob/main/Figure_1.png)
 
 ### Output Nodes
 Output nodes represent possible actions the AI agent can take:
