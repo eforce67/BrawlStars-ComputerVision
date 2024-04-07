@@ -22,7 +22,8 @@ Output nodes represent possible actions the AI agent can take:
 - Move_back
 - Move_forward
 - Stand_Still
-- Shoot
+- Auto_aim
+- Manual_aim
 - Activate Super
 - Activate Hypercharge
 
