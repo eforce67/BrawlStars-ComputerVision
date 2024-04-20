@@ -1,4 +1,3 @@
-import secrets
 import threading
 import time
 
@@ -8,6 +7,44 @@ import win32gui
 import win32ui
 from PIL import Image
 from pynput.keyboard import Key
+
+
+class ActionThread(threading.Thread):
+    def __init__(self, action):
+        super(ActionThread, self).__init__()
+        self.action = action
+        self._keep_running = True
+
+    def stop(self):
+        self._keep_running = False
+
+    def run(self):
+        while self._keep_running and self.action in [0, 1, 2, 3, 4]:
+            self.execute_action()
+        else:
+            self.execute_action()
+
+    def execute_action(self):
+        ACTIONS = {
+            0: move_up,
+            1: move_down,
+            2: move_left,
+            3: move_right,
+            4: stand_still,
+            5: auto_aim,
+            6: activate_gadget,
+            7: activate_super,
+            8: activate_hypercharge,
+        }
+        action_func = ACTIONS.get(self.action, None)
+        if action_func:
+            action_func()
+
+# Example usage
+def start_action(action):
+    thread = ActionThread(action)
+    thread.start()
+    return thread
 
 # Find the handle of the window
 hwndMain = win32gui.FindWindow(None, "LDPlayer")
@@ -48,21 +85,37 @@ def screen_shot():
     saveDC.DeleteDC()
     mfcDC.DeleteDC()
     win32gui.ReleaseDC(hwndChild, hwndDC)
+    
+    return img
 
 def send_keys_to_window(hwnd, keys):
     # Below we loop over the keys and handle what they are
-    # Keys like up and down are seperated from the letters like ABCD
+    # Keys like up and down are separated from the letters like ABCD
     for key in keys:
         if isinstance(key, str):
             vk_code = ord(key.upper())  # Get the virtual key code for the key
         else:
             vk_code = key.value.vk  # Get the virtual key code from the Key enum
         win32gui.PostMessage(hwnd, win32con.WM_KEYDOWN, vk_code, 0)
-        time.sleep(0.50)  # Add a small delay after each key press
+        time.sleep(0.45)  # Add a small delay after each key press
         win32gui.PostMessage(hwnd, win32con.WM_KEYUP, vk_code, 0)
-        time.sleep(0.01)  # Add a small delay after each key release
+        time.sleep(0.05)  # Add a small delay after each key release
 
 # Self-explanatory functions
+def start_game():
+    # the start button happens to be where the gadget button is
+    send_keys_to_window(hwndChild, ['q'])
+    time.sleep(10)
+
+def exit_screen():
+    for _ in range(2):
+        send_keys_to_window(hwndChild, ['q'])
+        time.sleep(2)
+    
+def stand_still():
+    print('standing still')
+    pass
+
 def move_up():
     print('moving up')
     send_keys_to_window(hwndChild, [Key.up])
@@ -95,30 +148,15 @@ def activate_hypercharge():
     print('activating the hypercharge')
     send_keys_to_window(hwndChild, ['r'])
 
-def send_keys_loop():
-    # Below we tell the machine code to "randomly"
-    # Choose an action to perform
-    while True:
-        screen_shot() # take a photo of the current window
-        choices = [move_down, 
-                   move_left, 
-                   move_right, 
-                   move_up, 
-                   auto_aim, 
-                   activate_gadget, 
-                   activate_hypercharge, 
-                   activate_super]
-        option = secrets.choice(choices) # Get the action
-        option() # Call the action
-        time.sleep(0.1)  # Add a delay between each key sequence
-
-def send_right_click(x, y):
+def disable_afk():
+    send_keys_to_window(hwndChild, [Key.up])
+    send_keys_to_window(hwndChild, [Key.down])
+    send_keys_to_window(hwndChild, [Key.left])
+    send_keys_to_window(hwndChild, [Key.right])
+    
+def manual_aim(x, y):
     # This function is current in beta and might not work as intended...
     win32api.SetCursorPos((x, y))
     win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, x, y, 0, 0)
     time.sleep(0.5)  # You may adjust the delay as needed
     win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, x, y, 0, 0)
-
-# Create a new thread for the key-sending script
-key_sender_thread = threading.Thread(target=send_keys_loop)
-key_sender_thread.start()
