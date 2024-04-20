@@ -2,9 +2,11 @@
 Based on Darwinian evolutionary theory!
 This script is in beta testing. The main focus is to train a neural network while having some computer vision to process the environment.
 """
+import os
 import pickle
 from time import time
 
+import keyboard
 import neat
 import numpy as np
 from ultralytics.models import YOLO
@@ -12,6 +14,11 @@ from ultralytics.models import YOLO
 import controller
 import visualize
 
+template_paths = {
+    'Victory': 'victory.jpg',
+    'Defeat': 'defeat.jpg',
+    'Draw': 'draw.jpg'
+}
 
 # Image processing functions
 def load_image_and_detect(image_path, model='resources/models/best.pt'):
@@ -191,37 +198,36 @@ def clean_inputs(predictions):
                             gadget = [1]
         except TypeError:
             break
-    if player_coord is None:
-        return respawning + [0] + [0] + super_ability + hypercharge + gadget
 
     # Calculate distances to visible walls, enemies, and gems
     visible_enemies = []
     visible_gems = []
     walls_in_range = []
     
-    p1_x, p1_y = player_coord['center'][2], player_coord['center'][3]
-    for wall in walls:
-        rect_x, rect_y = wall['center'][2], wall['center'][3]
-        rect_w, rect_h = wall['area'][0], wall['area'][1]
-        wall_distance = calculate_distance(p1_x, rect_x, p1_y, rect_y)
-        walls_in_range.append(wall_distance)
-        
-        for enemy in enemies:
-            enemy_x, enemy_y = enemy[0], enemy[1]
-            if line_intersects_rect(p1_x, p1_y, enemy_x, enemy_y, rect_x, rect_y, rect_w, rect_h):
-                print('found enemy')
-                enemy_distance = calculate_distance(p1_x, enemy_x, p1_y, enemy_y)
-                visible_enemies.append(enemy_distance)
-        for gem in gems:
-            gem_x, gem_y = gem[0], gem[1]
-            if line_intersects_rect(p1_x, p1_y, gem_x, gem_y, rect_x, rect_y, rect_w, rect_h):
-                print('found gems')
-                gem_distance = calculate_distance(p1_x, gem_x, p1_y, gem_y)
-                visible_gems.append(gem_distance)
+    if player_coord is not None:
+        p1_x, p1_y = player_coord['center'][2], player_coord['center'][3]
+        for wall in walls:
+            rect_x, rect_y = wall['center'][2], wall['center'][3]
+            rect_w, rect_h = wall['area'][0], wall['area'][1]
+            wall_distance = calculate_distance(p1_x, rect_x, p1_y, rect_y)
+            walls_in_range.append(wall_distance)
+            
+            for enemy in enemies:
+                enemy_x, enemy_y = enemy[0], enemy[1]
+                if line_intersects_rect(p1_x, p1_y, enemy_x, enemy_y, rect_x, rect_y, rect_w, rect_h):
+                    print('found enemy')
+                    enemy_distance = calculate_distance(p1_x, enemy_x, p1_y, enemy_y)
+                    visible_enemies.append(enemy_distance)
+            for gem in gems:
+                gem_x, gem_y = gem[0], gem[1]
+                if line_intersects_rect(p1_x, p1_y, gem_x, gem_y, rect_x, rect_y, rect_w, rect_h):
+                    print('found gems')
+                    gem_distance = calculate_distance(p1_x, gem_x, p1_y, gem_y)
+                    visible_gems.append(gem_distance)
     if walls_in_range:
         closest_8_walls = sorted(walls_in_range + [0] * (8 - len(walls_in_range)))[:8]
     else:
-        closest_8_walls = sorted(walls + [0] * (8 - len(walls)))
+        closest_8_walls = [0]*8
 
     if visible_enemies:
         nearest_visible_enemy = min(visible_enemies)
@@ -232,6 +238,8 @@ def clean_inputs(predictions):
         nearest_visible_gem = min(visible_gems)
     else:
         nearest_visible_gem = 0
+    if player_coord is None:
+        return respawning + [0] + [0] + super_ability + hypercharge + gadget + closest_8_walls
     return respawning + [nearest_visible_enemy] + [nearest_visible_gem] + super_ability + hypercharge + gadget + closest_8_walls
 
 def neat_reward_fitness(genome, reward_num):
@@ -253,21 +261,9 @@ def run_simulation(genome, config):
     thread = None
     
     network = neat.ctrnn.CTRNN.create(genome, config, 0.01)
-    
-    ACTIONS = {
-        0: controller.move_up,
-        1: controller.move_down,
-        2: controller.move_left,
-        3: controller.move_right,
-        4: controller.auto_aim,
-        5: controller.activate_gadget,
-        6: controller.activate_super,
-        7: controller.activate_hypercharge,
-    }
-    
     controller.start_game()
-    
-    while True:
+        
+    while not keyboard.is_pressed('o'):
         controller.screen_shot()
         prediction = load_image_and_detect('LDPlayer_screen.png')
         shot_success = [obj for obj in prediction if 'shot_success' in obj]
@@ -288,7 +284,7 @@ def run_simulation(genome, config):
                 thread.stop()
                 thread = controller.start_action(action_taken)
         else:
-            ACTIONS[action_taken]()
+            controller.start_action(action_taken)
                 
         previous_action = action_taken
         
@@ -297,23 +293,27 @@ def run_simulation(genome, config):
             
         if shot_success and previous_action == 4 or 5 and skip_turn1 == 2:
             skip_turn1 =- 3
-            print('rewarding the agent')
-            neat_reward_fitness(genome, 0.5)
-        if previous_action == 4 or 5 and not shot_success:
+            print('rewarding the agent for shot success')
+            neat_reward_fitness(genome, 1)
+        if previous_action == 5 and not shot_success:
             skip_turn1 += 1
-            print('removing a reward from the agent')
-            neat_reward_fitness(genome, -0.4)
+            print('removing a reward from the agent for wasting ammo')
+            neat_reward_fitness(genome, -0.35)
         if not gadget_presence and action_taken == 6:
+            print('removing a reward from the agent for wasting gadget')
             neat_reward_fitness(genome, -0.35)
         if not super_presence and action_taken == 7:
+            print('removing a reward from the agent for wasting super')
             neat_reward_fitness(genome, -0.35)
         if respawning:
             if skip_turn2 == 3:
                 skip_turn2 =- 3
-                neat_reward_fitness(genome, -1)
+                print('removing a reward from the agent for dying')
+                neat_reward_fitness(genome, -0.40)
             else:
                 skip_turn2 += 1
     print('simulation ended...')
+    controller.exit_screen()
 
 def survival_of_the_fittest(genomes, config):
     """
@@ -321,7 +321,7 @@ def survival_of_the_fittest(genomes, config):
     """
     for idx, (genome_id, genome) in enumerate(genomes):
         genome.fitness = 0
-        run_simulation(genomes, config)
+        run_simulation(genome, config)
     
 def neat_run(config_file):
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_file)
