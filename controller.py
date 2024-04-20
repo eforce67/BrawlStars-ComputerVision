@@ -14,18 +14,7 @@ class ActionThread(threading.Thread):
         super(ActionThread, self).__init__()
         self.action = action
         self._keep_running = True
-
-    def stop(self):
-        self._keep_running = False
-
-    def run(self):
-        while self._keep_running and self.action in [0, 1, 2, 3, 4]:
-            self.execute_action()
-        else:
-            self.execute_action()
-
-    def execute_action(self):
-        ACTIONS = {
+        self.ACTIONS = {
             0: move_up,
             1: move_down,
             2: move_left,
@@ -36,7 +25,30 @@ class ActionThread(threading.Thread):
             7: activate_super,
             8: activate_hypercharge,
         }
-        action_func = ACTIONS.get(self.action, None)
+        self.CORRESPONDING_ACTION = {
+            0: lambda: print('moving up'),
+            1: lambda: print('moving down'),
+            2: lambda: print('moving left'),
+            3: lambda: print('moving right'),
+            4: lambda: print('standing still'),
+            5: lambda: print('auto aiming'),
+            6: lambda: print('activating gadget'),
+            7: lambda: print('activating super'),
+            8: lambda: print('activating hypercharge'),
+        }
+
+    def stop(self):
+        self._keep_running = False
+
+    def run(self):
+        self.CORRESPONDING_ACTION.get(self.action, None)
+        while self._keep_running and self.action in [0, 1, 2, 3, 4]:
+            self.execute_action()
+        else:
+            self.execute_action()
+
+    def execute_action(self):
+        action_func = self.ACTIONS.get(self.action, None)
         if action_func:
             action_func()
 
@@ -90,7 +102,7 @@ def screen_shot():
 
 def send_keys_to_window(hwnd, keys):
     # Below we loop over the keys and handle what they are
-    # Keys like up and down are separated from the letters like ABCD
+    # Keys like up and down are seperated from the letters like ABCD
     for key in keys:
         if isinstance(key, str):
             vk_code = ord(key.upper())  # Get the virtual key code for the key
@@ -113,39 +125,30 @@ def exit_screen():
         time.sleep(2)
     
 def stand_still():
-    print('standing still')
     pass
 
 def move_up():
-    print('moving up')
     send_keys_to_window(hwndChild, [Key.up])
 
 def move_down():
-    print('moving down')
     send_keys_to_window(hwndChild, [Key.down])
 
 def move_left():
-    print('moving left')
     send_keys_to_window(hwndChild, [Key.left])
 
 def move_right():
-    print('moving right')
     send_keys_to_window(hwndChild, [Key.right])
 
 def auto_aim():
-    print('auto aiming')
     send_keys_to_window(hwndChild, ['e'])
 
 def activate_super():
-    print('activating the super')
     send_keys_to_window(hwndChild, ['f'])
 
 def activate_gadget():
-    print('activating the gadget')
     send_keys_to_window(hwndChild, ['q'])
 
 def activate_hypercharge():
-    print('activating the hypercharge')
     send_keys_to_window(hwndChild, ['r'])
 
 def disable_afk():
