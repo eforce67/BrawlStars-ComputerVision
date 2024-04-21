@@ -2,7 +2,6 @@
 Based on Darwinian evolutionary theory!
 This script is in beta testing. The main focus is to train a neural network while having some computer vision to process the environment.
 """
-import os
 import pickle
 from time import time
 
@@ -13,12 +12,6 @@ from ultralytics.models import YOLO
 
 import controller
 import visualize
-
-template_paths = {
-    'Victory': 'victory.jpg',
-    'Defeat': 'defeat.jpg',
-    'Draw': 'draw.jpg'
-}
 
 # Image processing functions
 def load_image_and_detect(image_path, model='resources/models/best.pt'):
@@ -224,6 +217,9 @@ def clean_inputs(predictions):
                     print('found gems')
                     gem_distance = calculate_distance(p1_x, gem_x, p1_y, gem_y)
                     visible_gems.append(gem_distance)
+    print('ALL GEMS FOUND:', visible_gems)
+    print('ALL ENEMIES FOUND:', visible_enemies)
+    print('ALL WALLS FOUND:', walls_in_range)
     if walls_in_range:
         closest_8_walls = sorted(walls_in_range + [0] * (8 - len(walls_in_range)))[:8]
     else:
@@ -261,7 +257,7 @@ def run_simulation(genome, config):
     thread = None
     
     network = neat.ctrnn.CTRNN.create(genome, config, 0.01)
-    controller.start_game()
+    controller.press_game()
         
     while not keyboard.is_pressed('o'):
         controller.screen_shot()
@@ -271,10 +267,11 @@ def run_simulation(genome, config):
         gadget_presence = [obj for obj in prediction if 'gadget' in obj]
         super_presence = [obj for obj in prediction if 'super' in obj]
         nputs = clean_inputs(prediction)
-        print(nputs)
+        print('INPUTS: ', nputs)
         
         current_time = time()
         elapsed_time = current_time - start_time
+        print('Time passed:', elapsed_time)
         output = network.advance(nputs, elapsed_time, elapsed_time)
         action_taken = np.argmax(output)
         if action_taken in [0, 1, 2, 3, 4]:
@@ -285,24 +282,24 @@ def run_simulation(genome, config):
                 thread = controller.start_action(action_taken)
         else:
             controller.start_action(action_taken)
-                
+            
         previous_action = action_taken
         
         if elapsed_time >= time_limit:
             break
             
-        if shot_success and previous_action == 4 or 5 and skip_turn1 == 2:
+        if shot_success and previous_action == 4 and skip_turn1 == 3:
             skip_turn1 =- 3
             print('rewarding the agent for shot success')
             neat_reward_fitness(genome, 1)
-        if previous_action == 5 and not shot_success:
+        if previous_action == 4 and not shot_success:
             skip_turn1 += 1
             print('removing a reward from the agent for wasting ammo')
             neat_reward_fitness(genome, -0.35)
-        if not gadget_presence and action_taken == 6:
+        if not gadget_presence and action_taken == 5:
             print('removing a reward from the agent for wasting gadget')
             neat_reward_fitness(genome, -0.35)
-        if not super_presence and action_taken == 7:
+        if not super_presence and action_taken == 6:
             print('removing a reward from the agent for wasting super')
             neat_reward_fitness(genome, -0.35)
         if respawning:
@@ -313,7 +310,8 @@ def run_simulation(genome, config):
             else:
                 skip_turn2 += 1
     print('simulation ended...')
-    controller.exit_screen()
+    thread.stop()
+    controller.press_game()
 
 def survival_of_the_fittest(genomes, config):
     """
