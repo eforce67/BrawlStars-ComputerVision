@@ -2,7 +2,7 @@
 fitness_criterion = max
 fitness_threshold = 200
 no_fitness_termination = False
-pop_size = 25
+pop_size = 10
 reset_on_extinction = False
 
 [DefaultStagnation]
