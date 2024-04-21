@@ -1,1 +1,1 @@
-
+in this folder, your neural network visualization structure will be saved here after it is done training! 
