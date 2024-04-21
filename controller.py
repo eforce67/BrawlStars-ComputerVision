@@ -19,29 +19,27 @@ class ActionThread(threading.Thread):
             1: move_down,
             2: move_left,
             3: move_right,
-            4: stand_still,
-            5: auto_aim,
-            6: activate_gadget,
-            7: activate_super,
-            8: activate_hypercharge,
+            4: auto_aim,
+            5: activate_gadget,
+            6: activate_super,
+            7: activate_hypercharge,
         }
         self.CORRESPONDING_ACTION = {
-            0: lambda: print('moving up'),
-            1: lambda: print('moving down'),
-            2: lambda: print('moving left'),
-            3: lambda: print('moving right'),
-            4: lambda: print('standing still'),
-            5: lambda: print('auto aiming'),
-            6: lambda: print('activating gadget'),
-            7: lambda: print('activating super'),
-            8: lambda: print('activating hypercharge'),
+            0: 'moving up',
+            1: 'moving down',
+            2: 'moving left',
+            3: 'moving right',
+            4: 'auto aiming',
+            5: 'activating gadget',
+            6: 'activating super',
+            7: 'activating hypercharge',
         }
 
     def stop(self):
         self._keep_running = False
 
     def run(self):
-        self.CORRESPONDING_ACTION.get(self.action, None)
+        print('ACTION TAKEN: ', self.CORRESPONDING_ACTION.get(self.action, None))
         while self._keep_running and self.action in [0, 1, 2, 3, 4]:
             self.execute_action()
         else:
@@ -114,18 +112,9 @@ def send_keys_to_window(hwnd, keys):
         time.sleep(0.05)  # Add a small delay after each key release
 
 # Self-explanatory functions
-def start_game():
-    # the start button happens to be where the gadget button is
+def press_game():
     send_keys_to_window(hwndChild, ['q'])
-    time.sleep(10)
-
-def exit_screen():
-    for _ in range(2):
-        send_keys_to_window(hwndChild, ['q'])
-        time.sleep(2)
-    
-def stand_still():
-    pass
+    time.sleep(8.5)
 
 def move_up():
     send_keys_to_window(hwndChild, [Key.up])
