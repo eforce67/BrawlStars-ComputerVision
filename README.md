@@ -7,7 +7,7 @@
 The Brawl Stars AI project aims to develop a continuous-time recurrent neural network using neuroevolution to create an efficient gameplay strategy for the popular FPS game, Brawl Stars. This project leverages various libraries and technologies to achieve its goal.
 - Here's the computer vision model trained with 207 manually labeled images: [dataset](https://universe.roboflow.com/neonsharp/bs-multi-object-detection). Training results can be found here:
 - [training result previous (not recommended)](https://mega.nz/folder/uCYmBaxJ#5FBihJ77fwlSB0rIlB70qw)
-- [training result 2 (latest)]([https://mega.nz/folder/uGogBbZB#hWY8tXO0kOGGrGU5vGityw](https://mega.nz/folder/uGogBbZB#hWY8tXO0kOGGrGU5vGityw)
+- [training result 2 (latest)(https://mega.nz/folder/uGogBbZB#hWY8tXO0kOGGrGU5vGityw)
 
 **Getting Started**
 ---------------
@@ -25,13 +25,16 @@ pip install graphviz matplotlib neat-python numpy opencv-python pillow pywin32 p
 
 The input nodes consist of the following information that will be given to the model:
 
-* `0`: Respawn status
-* `1`: Nearest visible enemy
-* `2`: Nearest visible gem
-* `3`: Super ability status
-* `4`: Hypercharge status
-* `5`: Gadget status
-* `6-14`: Closest 8 walls to the player
+* `0`: Victory status
+* `1`: Defeat status
+* `2`: Draw status
+* `3`: Respawn status
+* `4`: Nearest visible enemy
+* `5`: Nearest visible gem
+* `6`: Super ability status
+* `7`: Hypercharge status
+* `8`: Gadget status
+* `9-17`: Closest 8 walls to the player
 
 **Demo**
 --------
@@ -83,3 +86,4 @@ The project utilizes YOLOv8, a state-of-the-art object detection model by Ultral
 - [ ] Improve simulation once the computer vision model is improved
 - [ ] Improve neural network inputs once the computer vision model is improved
 - [ ] Add manual aim logic
+- [ ] Improve enemy and gem detection
