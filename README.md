@@ -37,7 +37,7 @@ The input nodes consist of the following information that will be given to the m
 Here's a demo representing objects near the player:
 
 ![Demo of Player range and enemy detection](https://github.com/eforce67/BrawlStars-ComputerVision/blob/main/Figure_1.png)
-
+The script currently draws a line from the player to objects like enemies, gems, and walls. In special cases like the enemy and gem, if a line drawn from the player straight to the enemy intersects a rectangle/square-shaped wall, the intersect function will return false true, meaning we shouldn't shoot or walk straight towards the wall.
 ### Output Nodes
 
 The output nodes represent possible actions the AI agent can take:
@@ -46,7 +46,7 @@ The output nodes represent possible actions the AI agent can take:
 * Move down
 * Move left
 * Move right
-* Auto aim
+* Auto-aim
 * Activate gadget
 * Activate super
 * Activate hypercharge
@@ -54,7 +54,7 @@ The output nodes represent possible actions the AI agent can take:
 **Object Detection using YOLOv8**
 --------------------------------
 
-The project utilizes YOLOv8, a state-of-the-art object detection model by Ultralytics, to detect objects in the Brawl Stars environment. The following objects are supported by the fine-tuned YOLOv8 model:
+The project utilizes YOLOv8, a state-of-the-art object detection model by Ultralytics, to detect objects in the Brawl Stars environment. The fine-tuned YOLOv8 model supports the following objects:
 
 * Player health bar
 * Player position
@@ -72,3 +72,12 @@ The project utilizes YOLOv8, a state-of-the-art object detection model by Ultral
 * Hypercharge
 * Shot success
 * Respawn status
+* victory status
+* defeat status
+* draw status
+
+### TODO LIST
+- [ ] Improve the computer vision model
+- [ ] Improve simulation once the computer vision model is improved
+- [ ] Improve neural network inputs once the computer vision model is improved
+- [ ] Add manual aim logic
