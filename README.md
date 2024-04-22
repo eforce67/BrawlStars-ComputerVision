@@ -5,7 +5,7 @@
 -------------------
 
 The Brawl Stars AI project aims to develop a continuous-time recurrent neural network using neuroevolution to create an efficient gameplay strategy for the popular FPS game, Brawl Stars. This project leverages various libraries and technologies to achieve its goal.
-- Here's the computer vision model trained with 207 manually labeled images: [dataset](https://universe.roboflow.com/neonsharp/bs-multi-object-detection)]. Training results can be found [training result](https://mega.nz/folder/uCYmBaxJ#5FBihJ77fwlSB0rIlB70qw)
+- Here's the computer vision model trained with 207 manually labeled images: [dataset](https://universe.roboflow.com/neonsharp/bs-multi-object-detection). Training results can be found here: [training result](https://mega.nz/folder/uCYmBaxJ#5FBihJ77fwlSB0rIlB70qw)
 
 **Getting Started**
 ---------------
