@@ -240,15 +240,14 @@ def clean_inputs(predictions):
                 bottom_right = Point(x + w, y + h)
                 bottom_left = Point(x, y + h)
                 
-                if not any(doIntersect(ppoint, point1, epoint, point2) for point1, point2 in [(top_left, bottom_left), (top_right, bottom_right), (bottom_left, bottom_right), (top_left, top_right)]):
-                    print('found an enemy')
-                    available_enemies.append(calculate_distance(ppoint.x, epoint.x, ppoint.y, epoint.y))
+                distance = calculate_distance(ppoint.x, epoint.x, ppoint.y, epoint.y)
+                if distance in available_enemies:
+                    pass
                 else:
-                    print('no enemy found')
-                    
-                wall_distance = calculate_distance(ppoint.x, x, ppoint.y, y)
-                walls_in_range.append(wall_distance)
-
+                    if any(doIntersect(ppoint, point1, epoint, point2) for point1, point2 in [(top_left, bottom_left), (top_right, bottom_right), (bottom_left, bottom_right), (top_left, top_right)]):
+                        available_enemies.append(round(distance, 2))
+                walls_in_range.append(calculate_distance(ppoint.x, x, ppoint.y, y))
+                
     closest_8_walls = sorted(walls_in_range)[:8] if walls_in_range else [0] * 8
     nearest_visible_enemy = min(available_enemies) if available_enemies else 0
     if player_coord is None:
@@ -401,4 +400,7 @@ def neat_run(config_file):
     visualize.draw_net(config, winner, node_names=nodes_name, filename='resources/structure/Digraph.gv.svg')
 
 if __name__ == '__main__':
-    neat_run(config_file='resources/config/neat_settings.txt')
+    #neat_run(config_file='resources/config/neat_settings.txt')
+    predict = load_image_and_detect('test2.png')
+    nputs = clean_inputs(predict)
+    print(nputs.input_layer)
