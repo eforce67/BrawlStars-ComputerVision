@@ -21,20 +21,21 @@ pip install graphviz matplotlib neat-python numpy opencv-python pillow pywin32 p
 **Input and Output Nodes**
 -------------------------
 
-### Input Nodes
+### Input Nodes (18 total)
 
 The input nodes consist of the following information that will be given to the model:
 
-* `0`: Victory status
-* `1`: Defeat status
-* `2`: Draw status
-* `3`: Respawn status
-* `4`: Nearest visible enemy
-* `5`: Nearest visible gem
-* `6`: Super ability status
-* `7`: Hypercharge status
-* `8`: Gadget status
-* `9-17`: Closest 8 walls to the player
+* `0`: Victory status 0 = None 1 = True
+* `1`: Defeat status 0 = None 1 = True
+* `2`: Draw status 0 = None 1 = True
+* `3`: Respawn status 0 = None 1 = True
+* `4`: Shot success 0 = None 1 = True
+* `5`: Damage taken 0 = None 1 = True
+* `6`: Nearest visible enemy 0 = None 1 = enemy distance
+* `7`: Super ability status 0 = None 1 = True
+* `8`: Hypercharge status 0 = None 1 = True
+* `9`: Gadget status 0 = None 1 = True
+* `10-17`: Closest 8 walls to the player
 
 **Demo**
 --------
