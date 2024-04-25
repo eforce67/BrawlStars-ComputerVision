@@ -1,22 +1,12 @@
 import pickle
 from time import time
+
 import neat
 import numpy as np
-import controller
 
+import controller
 from train import clean_inputs, load_image_and_detect
 
-# Dictionary to map action indices to corresponding functions
-ACTIONS = {
-    0: controller.move_up,
-    1: controller.move_down,
-    2: controller.move_left,
-    3: controller.move_right,
-    4: controller.auto_aim,
-    5: controller.activate_gadget,
-    6: controller.activate_super,
-    7: controller.activate_hypercharge,
-}
 
 def load_model(model_path, config_path):
     """
@@ -42,7 +32,7 @@ def load_model(model_path, config_path):
 
     return model, config
 
-def run_model(genome, config):
+def run_model(genome, config, emulator_name):
     """
     Run the trained model on the game.
 
@@ -51,15 +41,19 @@ def run_model(genome, config):
         config: The configuration for the NEAT algorithm.
     """
     start_time = time()
-    time_limit = 207  # 3 minutes and 45 seconds
+    time_limit = 207
 
     # Create the neural network from the genome and configuration
     network = neat.ctrnn.CTRNN.create(genome, config, 0.01)
+    control_instance = controller.LDPlayerInstance(emulator_name)
+    control_instance.press_game()
 
     while True:
-        controller.screen_shot()
-        prediction = load_image_and_detect('LDPlayer_screen.png')
+        control_instance.screen_shot()
+        prediction = load_image_and_detect(f'screen_{emulator_name}.png')
         inputs = clean_inputs(prediction)
+        if (inputs.victory | inputs.defeat | inputs.draw) == 1:
+            break
         current_time = time()
         elapsed_time = current_time - start_time
 
@@ -68,14 +62,21 @@ def run_model(genome, config):
         action_taken = np.argmax(output)
 
         # Execute the action based on the output
-        ACTIONS[action_taken]()
+        if action_taken in range(5):
+            if thread is not None:
+                thread.stop()
+                thread = None
+            thread = controller.start_action(action_taken, control_instance)
+        else:
+            controller.start_action(action_taken, control_instance)
 
         # Exit the game if the time limit is reached
         if elapsed_time >= time_limit:
             print("3 minutes & 45 seconds have elapsed.")
-            controller.exit_screen()
             break
-
+    print('finished playing the game')
+    if thread is not None: thread.stop()
+    
 if __name__ == '__main__':
-    model, config = load_model('best.pickle', 'resources/config/neat_settings.txt')
-    run_model(model, config)
+    model, config = load_model('resources/structure/best.pickle', 'resources/config/neat_settings.txt')
+    run_model(model, config, 'LDPlayer')
