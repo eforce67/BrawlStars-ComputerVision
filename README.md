@@ -36,7 +36,7 @@ The input nodes consist of the following information that will be given to the m
 * `7`: Super ability status 0 = None 1 = True
 * `8`: Hypercharge status 0 = None 1 = True
 * `9`: Gadget status 0 = None 1 = True
-* `10-17`: Closest 8 walls to the player (These inputs might be removed in the future due to frequent text changes by Supercell. Ideally, the AI model should learn the map even without computer vision capabilities.)
+* `10-17`: Closest 8 walls to the player (These inputs might be removed in the future due to frequent changes by Supercell. Ideally, the AI model should learn the map even without computer vision capabilities.)
 
 **Demo**
 --------
@@ -90,4 +90,4 @@ The project utilizes YOLOv8, a state-of-the-art object detection model by Ultral
 - [ ] Add manual aim logic
 - [ ] Improve enemy and gem detection
 - [x] Parallel Training added
-- [x] Configuration added for more customization 
+- [x] Configuration added for more customization  
