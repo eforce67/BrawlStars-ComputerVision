@@ -4,7 +4,7 @@
 **Project Overview**
 -------------------
 
-The Brawl Stars AI project aims to develop a continuous-time recurrent neural network using neuroevolution to create an efficient gameplay strategy for the popular FPS game, Brawl Stars. This project leverages various libraries and technologies to achieve its goal.
+The Brawl Stars AI project aims to develop a continuous-time recurrent neural network using neuroevolution to create an efficient gameplay strategy for the popular FPS game, Brawl Stars. This project leverages various libraries and technologies to achieve its goal. Currently, the AI model I am designing can only play brawlers like Jackie. Please adjust the code to fit your style.
 - Here's the computer vision model trained with 207 manually labeled images: [dataset](https://universe.roboflow.com/neonsharp/bs-multi-object-detection). Training results can be found here:
 - [training result previous (not recommended)](https://mega.nz/folder/uCYmBaxJ#5FBihJ77fwlSB0rIlB70qw)
 - [training result 2 (latest)](https://mega.nz/folder/uGogBbZB#hWY8tXO0kOGGrGU5vGityw)
@@ -17,6 +17,7 @@ To run the project, ensure you have the following libraries installed:
 ```bash
 pip install graphviz matplotlib neat-python numpy opencv-python pillow pywin32 pynput ultralytics
 ```
+To start the program, I suggest you run train.py first to start training your first neural network. If you already have a model from a generation that you want to load from, in settings.yaml set load_training to your model path folder location.
 
 **Input and Output Nodes**
 -------------------------
@@ -35,7 +36,7 @@ The input nodes consist of the following information that will be given to the m
 * `7`: Super ability status 0 = None 1 = True
 * `8`: Hypercharge status 0 = None 1 = True
 * `9`: Gadget status 0 = None 1 = True
-* `10-17`: Closest 8 walls to the player
+* `10-17`: Closest 8 walls to the player (These inputs might be removed in the future due to frequent text changes by Supercell. Ideally, the AI model should learn the map even without computer vision capabilities.)
 
 **Demo**
 --------
@@ -88,3 +89,5 @@ The project utilizes YOLOv8, a state-of-the-art object detection model by Ultral
 - [ ] Improve neural network inputs once the computer vision model is improved
 - [ ] Add manual aim logic
 - [ ] Improve enemy and gem detection
+- [x] Parallel Training added
+- [x] Configuration added for more customization 
