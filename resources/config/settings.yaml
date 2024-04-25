@@ -1,0 +1,26 @@
+# Specify a folder path if you have a generation you can load from. Otherwise, set to false to start a generation from scratch.
+load_training: false
+
+# Enable GPU for YOLOv8 object detection model.
+enable_gpu: false
+
+# Number of simulation runs.
+number_of_runs: 100
+
+# YOLOv8 object detection model confidence threshold.
+confidence_threshold: 0.60
+
+# Names of your emulator instances. You can have up to 3 as of now.
+multi_parallel_training: 
+  - LDPlayer
+  - LDPlayer-1
+
+# Adjusting the amount of rewards you want to give to the model.
+reward_rules:
+  reward_for_winning: 2
+  reward_for_losing: -1
+  reward_for_draw: 1
+  reward_for_dying: -0.4
+  reward_for_successful_shooting: 0.5
+  reward_for_taking_damage: -0.35
+  reward_for_wasting_equipment: -0.35
