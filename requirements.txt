@@ -1,0 +1,10 @@
+graphviz
+matplotlib
+neat-python
+pyyaml
+numpy
+opencv-python
+pillow
+pywin32
+pynput
+ultralytics
