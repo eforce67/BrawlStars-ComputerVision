@@ -14,7 +14,7 @@ LOOPS = config.get('number_of_run', 50)
 CONFIDENCE = config.get('confidence_threshold', 0.8)
 PARALLEL_TRAINING = config.get('multi_parallel_training', ['LDPLayer'])
 if len(PARALLEL_TRAINING) > 3:
-    raise 'please check your parrallel training setting in your config, it should have a max of no more than 3 emulator names...'
+    raise 'please check your parallel training setting in your config, it should have a max of no more than 3 emulator names...'
 WINNING = config.get('reward_rules')['reward_for_winning']
 LOSING = config.get('reward_rules')['reward_for_losing']
 DRAWING = config.get('reward_rules')['reward_for_draw']
