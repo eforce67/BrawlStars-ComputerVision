@@ -8,6 +8,8 @@ import win32ui
 from PIL import Image
 from pynput.keyboard import Key
 
+import load_config
+
 
 class ActionThread(threading.Thread):
     def __init__(self, action, instance):
@@ -41,6 +43,7 @@ class ActionThread(threading.Thread):
             
 class LDPlayerInstance:
     def __init__(self, window_name):
+        self.window_name = window_name
         hwndMain = win32gui.FindWindow(None, window_name)
         self.hwndChild = win32gui.GetWindow(hwndMain, win32con.GW_CHILD)
     
@@ -61,8 +64,8 @@ class LDPlayerInstance:
         saveDC.SelectObject(saveBitMap)
 
         # Copy the contents of the window to the bitmap
-        result = saveDC.BitBlt((0, 0), (width, height), mfcDC, (0, 0), win32con.SRCCOPY)
-        print(result)
+        #result = saveDC.BitBlt((0, 0), (width, height), mfcDC, (0, 0), win32con.SRCCOPY)
+        #print(result)
 
         # Save the bitmap as an image file
         bmpinfo = saveBitMap.GetInfo()
@@ -88,12 +91,14 @@ class LDPlayerInstance:
         for key in keys:
             if isinstance(key, str):
                 vk_code = ord(key.upper())  # Get the virtual key code for the key
+                time1, time2 = load_config.PRESS_AND_HOLD.values()
             else:
                 vk_code = key.value.vk  # Get the virtual key code from the Key enum
+                time1, time2 = load_config.TAP_AND_RELEASE.values()
             win32gui.PostMessage(hwnd, win32con.WM_KEYDOWN, vk_code, 0)
-            time.sleep(0.45)  # Add a small delay after each key press
+            time.sleep(time1)  # Add a small delay after each key press
             win32gui.PostMessage(hwnd, win32con.WM_KEYUP, vk_code, 0)
-            time.sleep(0.15)  # Add a small delay after each key release
+            time.sleep(time2)  # Add a small delay after each key release
 
     # Self-explanatory functions
     def press_game(self):
@@ -101,42 +106,36 @@ class LDPlayerInstance:
         time.sleep(8.5)
 
     def move_up(self):
-        print('moving up')
+        print(f'{self.window_name} - moving up')
         self.send_keys_to_window(self.hwndChild, [Key.up])
 
     def move_down(self):
-        print('moving down')
+        print(f'{self.window_name} - moving down')
         self.send_keys_to_window(self.hwndChild, [Key.down])
 
     def move_left(self):
-        print('moving left')
+        print(f'{self.window_name} - moving left')
         self.send_keys_to_window(self.hwndChild, [Key.left])
 
     def move_right(self):
-        print('moving right')
+        print(f'{self.window_name} - moving right')
         self.send_keys_to_window(self.hwndChild, [Key.right])
 
     def auto_aim(self):
-        print('auto aiming')
+        print(f'{self.window_name} - auto aiming')
         self.send_keys_to_window(self.hwndChild, ['e'])
 
     def activate_super(self):
-        print('activating the super')
+        print(f'{self.window_name} - activating the super')
         self.send_keys_to_window(self.hwndChild, ['f'])
 
     def activate_gadget(self):
-        print('activating the gadget')
+        print(f'{self.window_name} - activating the gadget')
         self.send_keys_to_window(self.hwndChild, ['q'])
 
     def activate_hypercharge(self):
-        print('activating the hypercharge')
+        print(f'{self.window_name} - activating the hypercharge')
         self.send_keys_to_window(self.hwndChild, ['r'])
-
-    def disable_afk(self): # test purposes only to keep the ai alive
-        self.send_keys_to_window(self.hwndChild, [Key.up])
-        self.send_keys_to_window(self.hwndChild, [Key.down])
-        self.send_keys_to_window(self.hwndChild, [Key.left])
-        self.send_keys_to_window(self.hwndChild, [Key.right])
         
     def manual_aim(x, y):
         # This function is current in beta and might not work as intended...
