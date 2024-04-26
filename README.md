@@ -15,7 +15,7 @@ The Brawl Stars AI project aims to develop a continuous-time recurrent neural ne
 To run the project, ensure you have the following libraries installed:
 
 ```bash
-pip install graphviz matplotlib neat-python numpy opencv-python pillow pywin32 pynput ultralytics
+pip install graphviz matplotlib neat-python numpy opencv-python pillow pywin32 pynput ultralytics pyyaml
 ```
 To start the program, I suggest you run train.py first to start training your first neural network. If you already have a model from a generation that you want to load from, in settings.yaml set load_training to your model path folder location.
 
