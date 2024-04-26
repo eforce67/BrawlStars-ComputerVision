@@ -1,26 +1,31 @@
-# Specify a folder path if you have a generation you can load from. Otherwise, set to false to start a generation from scratch.
-load_training: false
+# General Settings
+load_training: false # Specify a folder path if you have a generation you can load from. Otherwise, set to false to start a generation from scratch.
+enable_gpu: false # Enable GPU for YOLOv8 object detection model.
+number_of_runs: 100 # Number of simulation runs.
+confidence_threshold: 0.60 # YOLOv8 object detection model confidence threshold.
 
-# Enable GPU for YOLOv8 object detection model.
-enable_gpu: false
-
-# Number of simulation runs.
-number_of_runs: 100
-
-# YOLOv8 object detection model confidence threshold.
-confidence_threshold: 0.60
-
-# Names of your emulator instances. You can have up to 3 as of now.
-multi_parallel_training: 
+# Emulator Instances
+multi_parallel_training:
   - LDPlayer
   - LDPlayer-1
+  # Set the name of the emulators you want to use
+  # You can have up to as many emulators as you desire as long as you can run them with your hardware.
+  # More emulator means faster training time
 
-# Adjusting the amount of rewards you want to give to the model.
+# Reward Rules
 reward_rules:
-  reward_for_winning: 2
-  reward_for_losing: -1
-  reward_for_draw: 1
-  reward_for_dying: -0.4
-  reward_for_successful_shooting: 0.5
-  reward_for_taking_damage: -0.35
-  reward_for_wasting_equipment: -0.35
+  reward_for_winning: 2 # Reward for winning a game.
+  reward_for_losing: -1 # Reward for losing a game.
+  reward_for_draw: 1 # Reward for a draw game.
+  reward_for_dying: -0.4 # Reward for dying during a game.
+  reward_for_successful_shooting: 0.5 # Reward for successful shooting.
+  reward_for_taking_damage: -0.35 # Reward for taking damage.
+  reward_for_wasting_equipment: -0.35 # Reward for wasting equipment.
+
+# Action Timing
+press_&_hold:
+  time1: 0.5 # Time to press and hold an action (in seconds).
+  time2: 0.15 # Time to release the hold (in seconds).
+tap_&_release:
+  time1: 0.45 # Time to tap an action (in seconds).
+  time2: 0.02 # Time to release the tap (in seconds).
