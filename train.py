@@ -3,6 +3,7 @@ Based on Darwinian evolutionary theory!
 This script is in beta testing. The main focus is to train a neural network while having some computer vision to process the environment.
 """
 import pickle
+import threading
 from time import time
 
 import neat
@@ -12,7 +13,7 @@ from ultralytics.models import YOLO
 import controller
 import load_config
 import visualize
-import concurrent
+
 
 class Point: 
     def __init__(self, x, y): 
@@ -256,9 +257,9 @@ def neat_reward_fitness(genome, reward_num):
 def run_simulation(genome, config, emulator_name):
     def print_status(status):
         status_map = {
-            'victory': (f'GAME STATUS: {status}, rewarding the agent', load_config.WINNING),
-            'defeat': (f'GAME STATUS: {status}, removing points from the agent', load_config.LOSING),
-            'draw': (f'GAME STATUS: {status}, rewarding the agent for a well played', load_config.DRAWING)
+            'victory': (f'{emulator_name} - GAME STATUS: {status}, rewarding the agent', load_config.WINNING),
+            'defeat': (f'{emulator_name} - GAME STATUS: {status}, removing points from the agent', load_config.LOSING),
+            'draw': (f'{emulator_name} - GAME STATUS: {status}, rewarding the agent for a well played', load_config.DRAWING)
         }
         print(status_map[status][0])
         neat_reward_fitness(genome, status_map[status][1])
@@ -277,7 +278,7 @@ def run_simulation(genome, config, emulator_name):
         control_instance.screen_shot(emulator_name)
         prediction = load_image_and_detect(f'screen_{emulator_name}.png')
         nputs = clean_inputs(prediction)
-        print('Inputs:', nputs.input_layer)
+        print(f'{emulator_name} - Inputs:', nputs.input_layer)
         if nputs.victory == 1:
             print_status('victory')
             break
@@ -289,7 +290,7 @@ def run_simulation(genome, config, emulator_name):
             break
         current_time = time()
         elapsed_time = current_time - start_time
-        print('Time passed:', elapsed_time)
+        print(f'{emulator_name} - Time passed:', elapsed_time)
         output = network.advance(nputs.input_layer, elapsed_time, elapsed_time)
         action_taken = np.argmax(output)
 
@@ -306,32 +307,32 @@ def run_simulation(genome, config, emulator_name):
 
         if nputs.shot_success == 1 and previous_action in [4, 6, 7] and skip_turn1 == 3:
             skip_turn1 =- 3
-            print('rewarding the agent for shot success')
+            print(f'{emulator_name} - rewarding the agent for shot success')
             neat_reward_fitness(genome, load_config.SHOT_SUCCESS)
         elif previous_action in [4, 6, 7] and nputs.shot_success == 0:
             skip_turn1 += 1
-            print('removing a reward from the agent for setting ammo')
+            print(f'{emulator_name} - removing a reward from the agent for setting ammo')
             neat_reward_fitness(genome, load_config.WASTED_EQUIPMENT)
         else:
             if skip_turn1 == 3: pass
             else: skip_turn1 += 1
 
         if nputs.gadget == 1 and action_taken == 5:
-            print('removing a reward from the agent for setting unavailable gadget')
+            print(f'{emulator_name} - removing a reward from the agent for setting unavailable gadget')
             neat_reward_fitness(genome, load_config.WASTED_EQUIPMENT)
 
         if nputs.super_ability == 0 and action_taken == 6:
-            print('removing a reward from the agent for setting unavailable super')
+            print(f'{emulator_name} - removing a reward from the agent for setting unavailable super')
             neat_reward_fitness(genome, load_config.WASTED_EQUIPMENT)
 
         if nputs.hypercharge == 0 and action_taken == 7:
-            print('removing a reward from the agent for setting unavailable hypercharge')
+            print(f'{emulator_name} - removing a reward from the agent for setting unavailable hypercharge')
             neat_reward_fitness(genome, load_config.WASTED_EQUIPMENT)
 
         if nputs.respawning == 1:
             if skip_turn2 == 3:
                 skip_turn2 -= 3
-                print('removing a reward from the agent for dying')
+                print(f'{emulator_name} - removing a reward from the agent for dying')
                 neat_reward_fitness(genome, load_config.DYING)
             else:
                 if skip_turn2 == 3: pass
@@ -342,28 +343,38 @@ def run_simulation(genome, config, emulator_name):
     print('simulation run completed...')
     if thread is not None: thread.stop()
     control_instance.press_game()
+
+def process_simulations(session, config):
+    threads = []
+    for genome, emulator in session:
+        process = threading.Thread(target=run_simulation, args=(genome, config, emulator))
+        process.start()
+        threads.append(process)
         
+    for thread in threads:
+        thread.join()
+    print('finished threading')
+
 def survival_of_the_fittest(genomes, config):
     emulator_names = load_config.PARALLEL_TRAINING
     total_emulator = len(emulator_names)
-
-    def run_threads(genome, emulator_index):
-        futures = []
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            genome.fitness = 0 if genome.fitness is None else genome.fitness
-            futures.append(executor.submit(run_simulation, genome, config, emulator_names[emulator_index]))
-            concurrent.futures.wait(futures)
+    session = []
 
     for idx, (genome_id, genome) in enumerate(genomes):
         genome.fitness = 0
-        run_threads(genome, 0)
+        session.append((genome, emulator_names[0]))
 
         if total_emulator >= 2:
-            run_threads(genomes[min(idx+1, len(genomes) - 1)], 1)
-
+            genome1 = (genomes[min(idx+1, len(genomes) - 1)])[1]
+            genome1.fitness = 0 if genome1.fitness is None else genome1.fitness
+            session.append((genome1, emulator_names[1]))
         if total_emulator == 3:
-            run_threads(genomes[min(idx+2, len(genomes) - 2)], 2)
-    
+            genome2 = (genomes[min(idx+2, len(genomes) - 2)])[1]
+            genome2.fitness = 0 if genome2.fitness is None else genome2.fitness
+            session.append((genome2, emulator_names[2]))
+        process_simulations(session, config)
+        session.clear()
+
 def neat_run(config_file):
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_file)
     if type(checkpoint:=load_config.SOURCE_TRAINING) is str:
@@ -399,10 +410,7 @@ def neat_run(config_file):
         6: 'activate super',
         7: 'activate hypercharge',
         }
-    visualize.draw_net(config, winner, node_names=nodes_name, filename='resources/structure/Digraph.gv.svg')
+    visualize.draw_net(config, winner, node_names=nodes_name, filename='resources/structure/Digraph.gv')
 
 if __name__ == '__main__':
     neat_run(config_file='resources/config/neat_settings.txt')
-    """predict = load_image_and_detect('test2.png')
-    nputs = clean_inputs(predict)
-    print(nputs.input_layer)"""
