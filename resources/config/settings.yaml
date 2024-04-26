@@ -10,7 +10,7 @@ multi_parallel_training:
   - LDPlayer-1
   # Set the name of the emulators you want to use
   # You can have up to as many emulators as you desire as long as you can run them with your hardware.
-  # More emulator means faster training time
+  # More emulators means faster training time
 
 # Reward Rules
 reward_rules:
