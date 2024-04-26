@@ -8,9 +8,11 @@ SOURCE_TRAINING = config.get('load_training', False)
 ENABLE_GPU = config.get('enable_gpu', False)
 
 # int/float constant
-LOOPS = config.get('number_of_run', 30)
+PRESS_AND_HOLD = config.get('press_&_hold')
+TAP_AND_RELEASE = config.get('tap_&_release')
+LOOPS = config.get('number_of_run', 50)
 CONFIDENCE = config.get('confidence_threshold', 0.8)
-PARALLEL_TRAINING = config.get('multi_parrallel_training', list('LDPLayer',))
+PARALLEL_TRAINING = config.get('multi_parallel_training', ['LDPLayer'])
 if len(PARALLEL_TRAINING) > 3:
     raise 'please check your parrallel training setting in your config, it should have a max of no more than 3 emulator names...'
 WINNING = config.get('reward_rules')['reward_for_winning']
