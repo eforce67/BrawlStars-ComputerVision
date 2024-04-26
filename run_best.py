@@ -42,6 +42,7 @@ def run_model(genome, config, emulator_name):
     """
     start_time = time()
     time_limit = 207
+    thread = None
 
     # Create the neural network from the genome and configuration
     network = neat.ctrnn.CTRNN.create(genome, config, 0.01)
@@ -49,7 +50,7 @@ def run_model(genome, config, emulator_name):
     control_instance.press_game()
 
     while True:
-        control_instance.screen_shot()
+        control_instance.screen_shot(emulator_name)
         prediction = load_image_and_detect(f'screen_{emulator_name}.png')
         inputs = clean_inputs(prediction)
         if (inputs.victory | inputs.defeat | inputs.draw) == 1:
@@ -58,7 +59,7 @@ def run_model(genome, config, emulator_name):
         elapsed_time = current_time - start_time
 
         # Advance the neural network and get the output
-        output = network.advance(inputs, current_time, current_time)
+        output = network.advance(inputs.input_layer, current_time, current_time)
         action_taken = np.argmax(output)
 
         # Execute the action based on the output
