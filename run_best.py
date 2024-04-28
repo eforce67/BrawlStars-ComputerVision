@@ -46,7 +46,7 @@ def run_model(genome, config, emulator_name):
     start_time = time()
 
     while True:
-        control_instance.screen_shot(emulator_name)
+        control_instance.screen_shot()
         prediction = load_image_and_detect(f'screen_{emulator_name}.png')
         inputs = clean_inputs(prediction)
         if (inputs.victory | inputs.defeat | inputs.draw) == 1:
