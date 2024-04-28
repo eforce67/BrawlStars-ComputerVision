@@ -294,7 +294,7 @@ def run_simulation(genome, config, emulator_name):
     start_time = time()
     print('beginning the match')
     while True:
-        control_instance.screen_shot(emulator_name)
+        control_instance.screen_shot()
         prediction = load_image_and_detect(f'screen_{emulator_name}.png')
         nputs = clean_inputs(prediction)
         print(f'{emulator_name} - Inputs:', nputs.input_layer)
@@ -318,8 +318,6 @@ def run_simulation(genome, config, emulator_name):
                 thread.stop()
                 thread = None
             thread = controller.start_action(action_taken, control_instance, nputs.visible_enemy, nputs.visible_enemy_epoint)
-        elif action_taken == 5:
-            controller.start_action(action_taken, control_instance, nputs.visible_enemy, nputs.visible_enemy_epoint)
         else:
             controller.start_action(action_taken, control_instance, nputs.visible_enemy, nputs.visible_enemy_epoint)
 
