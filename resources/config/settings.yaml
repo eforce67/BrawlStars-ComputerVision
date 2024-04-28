@@ -4,10 +4,14 @@ enable_gpu: false # Enable GPU for YOLOv8 object detection model.
 number_of_runs: 100 # Number of simulation runs.
 confidence_threshold: 0.60 # YOLOv8 object detection model confidence threshold.
 
+range_distance_limit: 500
+shot_delay: 0.8
+
 # Emulator Instances
 multi_parallel_training:
-  - LDPlayer
-  - LDPlayer-1
+  - BlueStacks App Player
+  #- LDPlayer
+  #- LDPlayer-1
   # Set the name of the emulators you want to use
   # You can have up to as many emulators as you desire as long as you can run them with your hardware.
   # More emulators means faster training time
@@ -24,8 +28,8 @@ reward_rules:
 
 # Action Timing
 press_&_hold:
-  time1: 0.5 # Time to press and hold an action (in seconds).
+  time1: 0.50 # Time to press and hold an action (in seconds).
   time2: 0.15 # Time to release the hold (in seconds).
 tap_&_release:
-  time1: 0.45 # Time to tap an action (in seconds).
-  time2: 0.02 # Time to release the tap (in seconds).
+  time1: 0.50 # Time to tap an action (in seconds).
+  time2: 0.05 # Time to release the tap (in seconds).
