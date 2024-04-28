@@ -39,12 +39,13 @@ class InputLayer:
         self.respawning = respawning
         self.shot_success = shot_success
         self.damage_taken = damage_taken
-        self.visible_enemy = visible_enemy
+        self.visible_enemy = visible_enemy[0]
+        self.visible_enemy_epoint = visible_enemy[1]
         self.super_ability = super_ability
         self.gadget = gadget
         self.hypercharge = hypercharge
         self.closest_walls = closest_walls
-        self.input_layer = [victory, defeat, draw, respawning, shot_success, damage_taken, visible_enemy, super_ability, gadget, hypercharge] + closest_walls
+        self.input_layer = [victory, defeat, draw, respawning, shot_success, damage_taken, self.visible_enemy, super_ability, gadget, hypercharge] + closest_walls
 
 # Image processing functions
 def load_image_and_detect(image_path, model='resources/models/best2.pt'):
@@ -222,7 +223,7 @@ def clean_inputs(predictions):
                 gadget = 1
 
     walls_in_range = []
-    available_enemies = []
+    available_enemies = {}
 
     if enemies and player_coord != None:
         ppoint = Point(player_coord['center'][0], player_coord['center'][1])
@@ -237,11 +238,28 @@ def clean_inputs(predictions):
                 bottom_left = Point(x, y + h)
                 walls_in_range.append(calculate_distance(ppoint.x, x, ppoint.y, y))
                 
-                if not any(doIntersect(ppoint, point1, epoint, point2) for point1, point2 in [(top_left, bottom_left), (top_right, bottom_right), (bottom_left, bottom_right), (top_left, top_right)]):
-                    available_enemies.append(round(calculate_distance(ppoint.x, epoint.x, ppoint.y, epoint.y), 5))
+                data = {round(calculate_distance(ppoint.x, epoint.x, ppoint.y, epoint.y), 1): (round(epoint.x), round(epoint.y))}
+                if not doIntersect(ppoint, top_left, epoint, bottom_left):
+                    available_enemies.update(data)
                     break
-    closest_8_walls = sorted(list(set(walls_in_range)))[:8] if walls_in_range else [0] * 8
-    nearest_visible_enemy = min(list(set(available_enemies))) if available_enemies else 0
+                elif not doIntersect(ppoint, top_right, epoint, bottom_right):
+                    available_enemies.update(data)
+                    break
+                elif not doIntersect(ppoint, top_left, epoint, top_right):
+                    available_enemies.update(data)
+                    break
+                elif not doIntersect(ppoint, bottom_right, epoint, bottom_left):
+                    available_enemies.update(data)
+                    break
+                else:
+                    pass
+    closest_8_walls = sorted(list(set(walls_in_range)))[:8] if len(walls_in_range) != 0 else []
+    closest_8_walls = closest_8_walls + [0] * (8 - len(closest_8_walls))
+    
+    closest_enemy = min(available_enemies) if available_enemies else 0
+    epoint = available_enemies[closest_enemy] if closest_enemy != 0 else None
+    
+    nearest_visible_enemy = (closest_enemy, epoint)
     return InputLayer(victory, defeat, draw, respawning, shot_success, damage_taken, nearest_visible_enemy, super_ability, hypercharge, gadget, closest_8_walls)
 
 def neat_reward_fitness(genome, reward_num):
@@ -264,16 +282,17 @@ def run_simulation(genome, config, emulator_name):
         print(status_map[status][0])
         neat_reward_fitness(genome, status_map[status][1])
 
-    start_time = time()
     time_limit = 210  # 3 minutes and 30 seconds
     skip_turn1 = 2
     skip_turn2 = 3
     previous_action = None
     thread = None
     network = neat.ctrnn.CTRNN.create(genome, config, 0.01)
-    control_instance = controller.LDPlayerInstance(emulator_name)
+    control_instance = controller.ControllerInstance(emulator_name)
     control_instance.press_game()
 
+    start_time = time()
+    print('beginning the match')
     while True:
         control_instance.screen_shot(emulator_name)
         prediction = load_image_and_detect(f'screen_{emulator_name}.png')
@@ -294,13 +313,15 @@ def run_simulation(genome, config, emulator_name):
         output = network.advance(nputs.input_layer, elapsed_time, elapsed_time)
         action_taken = np.argmax(output)
 
-        if action_taken in range(5):
+        if action_taken in range(3):
             if thread is not None:
                 thread.stop()
                 thread = None
-            thread = controller.start_action(action_taken, control_instance)
+            thread = controller.start_action(action_taken, control_instance, nputs.visible_enemy, nputs.visible_enemy_epoint)
+        elif action_taken == 5:
+            controller.start_action(action_taken, control_instance, nputs.visible_enemy, nputs.visible_enemy_epoint)
         else:
-            controller.start_action(action_taken, control_instance)
+            controller.start_action(action_taken, control_instance, nputs.visible_enemy, nputs.visible_enemy_epoint)
 
         if elapsed_time >= time_limit:
             break
@@ -343,7 +364,7 @@ def run_simulation(genome, config, emulator_name):
     print('simulation run completed...')
     if thread is not None: thread.stop()
     control_instance.press_game()
-
+    
 def process_simulations(session, config):
     threads = []
     for genome, emulator in session:
@@ -392,11 +413,12 @@ def neat_run(config_file):
     
     # input layer names, input layers must be organized!
     nodes_name = {
+        -10: 'activate hypercharge',
         -9: 'activate gadget',
-        -8: 'activate hypercharge',
-        -7: 'activate super',
-        -6: 'nearest gem',
-        -5: 'nearest enemy',
+        -8: 'activate super',
+        -7: 'nearest enemy',
+        -6: 'damage taken',
+        -5: 'shot success',
         -4: 'respawning state',
         -3: 'draw status',
         -2: 'defeat status',
@@ -406,9 +428,10 @@ def neat_run(config_file):
         2: 'move left',
         3: 'move right',
         4: 'auto aim',
-        5: 'activate gadget',
-        6: 'activate super',
-        7: 'activate hypercharge',
+        5: 'manual aim',
+        6: 'activate gadget',
+        7: 'activate super',
+        8: 'activate hypercharge',
         }
     visualize.draw_net(config, winner, node_names=nodes_name, filename='resources/structure/Digraph.gv')
 
