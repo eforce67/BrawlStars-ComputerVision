@@ -4,7 +4,7 @@
 **Project Overview**
 -------------------
 
-The Brawl Stars AI project aims to develop a continuous-time recurrent neural network using neuroevolution to create an efficient gameplay strategy for the popular FPS game, Brawl Stars. This project leverages various libraries and technologies to achieve its goal. Currently, the AI model I am designing can only play brawlers like Jackie. Please adjust the code to fit your style.
+This Brawl Stars AI project aims to develop a continuous-time recurrent neural network made using neuroevolution to create a model that can efficiently play the popular FPS game, Brawl Stars. This project leverages various libraries and technologies to achieve its goal. Learn more about the project via the [wiki](https://github.com/eforce67/BrawlStars-ComputerVision.wiki.git) 
 - Here's the computer vision model trained with 207 manually labeled images: [dataset](https://universe.roboflow.com/neonsharp/bs-multi-object-detection). Training results can be found here:
 - [training result previous (not recommended)](https://mega.nz/folder/uCYmBaxJ#5FBihJ77fwlSB0rIlB70qw)
 - [training result 2 (latest)](https://mega.nz/folder/uGogBbZB#hWY8tXO0kOGGrGU5vGityw)
@@ -54,6 +54,7 @@ The output nodes represent possible actions the AI agent can take:
 * Move left
 * Move right
 * Auto-aim
+* Manual-aim
 * Activate gadget
 * Activate super
 * Activate hypercharge
@@ -87,7 +88,7 @@ The project utilizes YOLOv8, a state-of-the-art object detection model by Ultral
 - [ ] Improve the computer vision model
 - [ ] Improve simulation once the computer vision model is improved
 - [ ] Improve neural network inputs once the computer vision model is improved
-- [ ] Add manual aim logic
-- [ ] Improve enemy and gem detection
+- [x] Add manual aim logic
+- [ ] Improve enemy and gem detection 
 - [x] Parallel Training added
 - [x] Configuration added for more customization  
