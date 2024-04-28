@@ -17,7 +17,8 @@ To run the project, ensure you have the following libraries installed:
 ```bash
 pip install graphviz matplotlib neat-python numpy opencv-python pillow pywin32 pynput ultralytics pyyaml
 ```
-To start the program, I suggest you run train.py first to start training your first neural network. If you already have a model from a generation that you want to load from, in settings.yaml set load_training to your model path folder location.
+To start the program, I suggest you run train.py first to start training your first neural network. If you already have a model from a generation that you want to load from, in settings.yaml set load_training to your model path folder location. Learning more here:
+* https://github.com/eforce67/BrawlStars-ComputerVision/wiki/Getting-started
 
 **Input and Output Nodes**
 -------------------------
